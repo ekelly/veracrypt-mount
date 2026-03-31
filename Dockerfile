@@ -1,10 +1,10 @@
-ARG DEBIAN_VERSION=12
+ARG DEBIAN_VERSION=13
 
 FROM debian:$DEBIAN_VERSION-slim
 
 # NOTE: ARGs need to be redefined after FROM
 ARG DEBIAN_VERSION
-ARG VERACRYPT_VERSION=1.26.14
+ARG VERACRYPT_VERSION=1.26.24
 
 ARG VERACRYPT_URL="https://launchpad.net/veracrypt/trunk/${VERACRYPT_VERSION}/+download/veracrypt-${VERACRYPT_VERSION}-Debian-${DEBIAN_VERSION}-amd64.deb"
 ARG VERACRYPT_SIG="${VERACRYPT_URL}.sig"
@@ -22,6 +22,7 @@ RUN apt-get update && \
     gpg --verify veracrypt.sig veracrypt.deb && \
     apt-get install ./veracrypt.deb -y --no-install-recommends && \
     rm -f veracrypt.deb veracrypt.sig veracrypt.asc && \
+    apt-get install -y fuse exfat-fuse ntfs-3g && \
     apt-get autoremove --purge -y wget gnupg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

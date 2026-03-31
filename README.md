@@ -16,7 +16,7 @@ Feeling excited? Let's dive in! 🚀
 Pull the `veracrypt-mount` image from Docker Hub:
 
 ```
-docker pull tomerh2001/veracrypt-mount:latest
+docker pull ekelly/veracrypt-mount:latest
 ```
 
 ### Docker Example
@@ -35,9 +35,10 @@ mkdir /path/to/decrypted
 docker run --rm
 -e VERACRYPT_PASSWORD=<your_veracrypt_password>
 -e VERACRYPT_SUBDIRECTORIES="subdir1,subdir2,subdir3"
+-e FILESYSTEM="exfat" 
 -v /path/to/encrypted-file:/encrypted-file
 -v /path/to/decrypted:/decrypted
-tomerh2001/veracrypt-mount:latest
+ekelly/veracrypt-mount:latest
 ```
 
 Replace `<your_veracrypt_password>` with the password for your VeraCrypt volume. Set `VERACRYPT_SUBDIRECTORIES` to a comma-separated list of subdirectories inside the encrypted volume that you want to mount. Adjust the volume paths as needed.
@@ -53,11 +54,14 @@ version: '3.8'
 
 services:
   veracrypt:
-    image: tomerh2001/veracrypt-mount:latest
+    image: ekelly/veracrypt-mount:latest
     environment:
       - VERACRYPT_PASSWORD=<your_veracrypt_password>
+      - FILESYSTEM=exfat # or fat, ntfs-3g, ext4
       - VERACRYPT_SUBDIRECTORIES=subdir1,subdir2,subdir3
+    privileged: true # Unfortunately seems to be needed
     volumes:
+      - /dev:/dev # Needed by Veracrypt 
       - /path/to/encrypted-file:/encrypted-file
       - decrypted:/decrypted
 
@@ -85,6 +89,7 @@ docker-compose up -d
 You can customize the behavior of the veracrypt-mount container by setting environment variables:
 
 - `VERACRYPT_PASSWORD`: The password for the VeraCrypt volume (required)
+- `FILESYSTEM`: The filesystem for the VeraCrypt volume. exfat, fat, ntfs-3g, or ext4 (required)
 - `VERACRYPT_SUBDIRECTORIES`: A comma-separated list of subdirectories inside the encrypted volume to mount (optional, default is to mount the entire volume)
 
 ## Contributing
@@ -96,3 +101,13 @@ We hope this Docker image helps make your data more secure and your life a littl
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/tomerh2001/veracrypt-mount/blob/main/LICENSE) file for details.
+
+## Issues
+
+```
+[veracrypt-1] 2026-03-31T04:21:16.131792760Z Error: device-mapper: create ioctl on veracrypt1  failed: Device or resource busy
+[veracrypt-1] 2026-03-31T04:21:16.131853772Z Command failed.
+[veracrypt-1] 2026-03-31T04:21:16.138714985Z Error: /dev/mapper/veracrypt1 not found.
+```
+
+Run `sudo cryptsetup close veracrypt1` on the host computer
