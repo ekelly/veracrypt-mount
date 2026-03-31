@@ -11,14 +11,14 @@ cleanup() {
     for (( i=${#SUBFOLDER_ARRAY[@]}-1; i>=0; i-- )); do
       SUBFOLDER="${SUBFOLDER_ARRAY[$i]}"
       echo "Unmounting subfolder: $SUBFOLDER"
-      umount "/encrypted-volume/$SUBFOLDER"
+      umount "/decrypted/$SUBFOLDER"
     done
   fi
 
   # Dismount the VeraCrypt volume
   echo "Dismounting VeraCrypt volume..."
-  veracrypt --text --dismount /encrypted-mount
-
+  veracrypt --text --dismount
+ 
   exit 0
 }
 
@@ -52,9 +52,11 @@ if [ -n "$SUBFOLDERS" ]; then
   # Iterate over the subfolders and bind mount them
   for SUBFOLDER in "${SUBFOLDER_ARRAY[@]}"; do
     echo "Mounting subfolder: $SUBFOLDER"
-    mkdir -p "/encrypted-volume/$SUBFOLDER"
-    mount --bind "/encrypted-mount/$SUBFOLDER" "/encrypted-volume/$SUBFOLDER"
+    mkdir -p "/decrypted/$SUBFOLDER"
+    mount --bind "/encrypted-mount/$SUBFOLDER" "/decrypted/$SUBFOLDER"
   done
+else
+  mount --bind "/encrypted-mount" "/decrypted/$SUBFOLDER"
 fi
 
 # Wait indefinitely in the background so the script can catch signals

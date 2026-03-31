@@ -63,17 +63,15 @@ services:
     volumes:
       - /dev:/dev # Needed by Veracrypt 
       - /path/to/encrypted-file:/encrypted-file
-      - decrypted:/decrypted
+      - /path/to/decrypted/mount:/decrypted:shared
 
   other-service:
     image: your/other-service
     volumes:
-      - decrypted:/path/in/other-service
+      - /path/to/decrypted/mount:/path/in/other-service:shared
     depends_on:
       - veracrypt
 
-volumes:
-  decrypted:
 ```
 
 Replace `<your_veracrypt_password>` with the password for your VeraCrypt volume. Set `VERACRYPT_SUBDIRECTORIES` to a comma-separated list of subdirectories inside the encrypted volume that you want to mount. Adjust the volume paths and other service details as needed.
